@@ -7,5 +7,7 @@ export type FieldError = {
     suburb: FieldError;
     postcode: FieldError;
     state: FieldError;
+    errorMessage?: string;
+    hasError?: boolean
   };
   

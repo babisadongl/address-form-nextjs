@@ -3,93 +3,28 @@
 import { useState } from 'react';
 import { STATE_LIST } from '../constants/state-list'
 import { Errors } from '../interface/validate-form-error';
+import {validateFields, validateForm} from '../validations/address-form-validation';
 
 const AddressForm = () => {
   const [suburb, setSuburb] = useState('');
   const [postcode, setPostcode] = useState('');
   const [state, setState] = useState('');
-  const [errors, setErrors] = useState<Errors>({
+  let [errors, setErrors] = useState<Errors>({
     suburb: { valid: true, message: '' },
     postcode: { valid: true, message: '' },
     state: { valid: true, message: '' },
+    errorMessage: ''
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    validateForm()
+    validateOnKeyDown()
   }
 
-  const validateForm = () => {
-    const errors: Errors = {
-        suburb: {valid: true, message: ''},
-        postcode: {valid: true, message: ''},
-        state: {valid: true, message: ''},
-    };
-    // Object.keys(errors).forEach((x) => validateField(x))
-    if (!suburb && !postcode) {
-        errors.suburb.valid = false;
-        errors.postcode.valid = false;
-        errors.suburb.message = 'Suburb or Postcode is required.';
-        errors.postcode.message = 'Postcode or Suburb is required.';
-        
-    }
-
-    if(postcode && !/^\d{4}$/.test(postcode)) { // Post code must be 4 digit
-        errors.postcode.valid = false
-        errors.postcode.message = 'Postcode must be a 4-digit number.';
-    }
-
-    if (!state) {
-        errors.state.valid = false;
-        errors.state.message = 'State is required.';
-    }
-    
-    setErrors(errors);
-    return Object.keys(errors).find((x) => !errors[x as keyof Errors].valid);
-  };
-
-//   const validateField = (field: string) => {
-//     const newErrors: Errors = { ...errors };
-
-//     switch (field) {
-//       case 'suburb':
-//         if (!suburb && !postcode) {
-//           newErrors.suburb.valid = false;
-//           newErrors.suburb.message = 'Suburb or Postcode is required.';
-//         } else {
-//             newErrors.suburb.valid = true
-//             newErrors.postcode.valid = true
-//         }
-//         break;
-//       case 'postcode':
-//         if (!suburb && !postcode) {
-//             newErrors.suburb.valid = false;
-//             newErrors.suburb.message = 'Postcode or Suburb is required.';
-//           }
-//         else{
-//             newErrors.suburb.valid = true
-//             newErrors.postcode.valid = true
-//         }
-//         if (postcode && !/^\d{4}$/.test(postcode)) {
-//             newErrors.postcode.valid = false;
-//             newErrors.postcode.message = 'Postcode must be a 4-digit number.';
-//         }
-//         break;
-//       case 'state':
-//         if (!state) {
-//             newErrors.state.valid = false;
-//             newErrors.state.message = 'State is required.';
-//         } else {
-//             newErrors.state.valid = true
-//         }
-//         break;
-//       default:
-//         break;
-//     }
-
-//     setErrors(newErrors);
-//   };
-
+  const validateOnKeyDown = () => {
+    errors = validateForm(suburb, postcode, state)
+    setErrors(errors)
+  }
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 border rounded-lg shadow-md bg-gray-100">
@@ -103,7 +38,7 @@ const AddressForm = () => {
             id="suburb"
             value={suburb}
             onChange={(e) => setSuburb(e.target.value)}
-            // onKeyDown={() => validateForm('suburb')}
+            onBlur={() => validateOnKeyDown()}
             className={`w-full p-3 mt-1 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-200 ${!errors.suburb.valid ? 'border-red-500' : ''}`}
             placeholder="Enter suburb"
           />
@@ -117,7 +52,7 @@ const AddressForm = () => {
             id="postcode"
             value={postcode}
             onChange={(e) => setPostcode(e.target.value)}
-            // onKeyDown={() => validateForm('postcode')}
+            onBlur={() => validateOnKeyDown()}
             className={`w-full p-3 mt-1 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-200 ${!errors.postcode.valid ? 'border-red-500' : ''}`}
             placeholder="Enter postcode"
           />
@@ -130,7 +65,6 @@ const AddressForm = () => {
             id="state"
             value={state}
             onChange={(e) => setState(e.target.value)}
-            // onKeyDown={() => validateForm('state')}
             className={`w-full p-3 mt-1 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-200 ${!errors.state.valid ? 'border-red-500' : ''}`}
           >
             <option value="">Select State</option>
@@ -140,6 +74,8 @@ const AddressForm = () => {
           </select>
           {!errors.state.valid && <p className="text-red-500 text-sm mt-1">{errors.state.message}</p>}
         </div>
+
+        {errors.errorMessage && <p className="text-red-500 text-sm mt-1">{errors.errorMessage}</p>}
 
         <div className="mt-6">
           <button

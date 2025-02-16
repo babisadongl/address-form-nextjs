@@ -18,12 +18,17 @@ const AddressForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    validateOnKeyDown()
+    const formError = validateFormData()
+    console.log(formError)
+    if(!formError.hasError) {
+        // API call for submit
+    }
   }
 
-  const validateOnKeyDown = () => {
+  const validateFormData = () => {
     errors = validateForm(suburb, postcode, state)
     setErrors(errors)
+    return errors
   }
 
   return (
@@ -38,7 +43,7 @@ const AddressForm = () => {
             id="suburb"
             value={suburb}
             onChange={(e) => setSuburb(e.target.value)}
-            onBlur={() => validateOnKeyDown()}
+            onBlur={() => validateFormData()}
             className={`w-full p-3 mt-1 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-200 ${!errors.suburb.valid ? 'border-red-500' : ''}`}
             placeholder="Enter suburb"
           />
@@ -52,7 +57,7 @@ const AddressForm = () => {
             id="postcode"
             value={postcode}
             onChange={(e) => setPostcode(e.target.value)}
-            onBlur={() => validateOnKeyDown()}
+            onBlur={() => validateFormData()}
             className={`w-full p-3 mt-1 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-200 ${!errors.postcode.valid ? 'border-red-500' : ''}`}
             placeholder="Enter postcode"
           />

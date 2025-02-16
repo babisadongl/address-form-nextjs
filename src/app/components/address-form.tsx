@@ -12,6 +12,7 @@ const AddressForm = () => {
   const [postcode, setPostcode] = useState('');
   const [state, setState] = useState('');
   const [successFormMessage, setSuccessFormMessage] = useState('');
+  const [result, setResult] = useState([]);
   let [errors, setErrors] = useState<Errors>({
     suburb: { valid: true, message: '' },
     postcode: { valid: true, message: '' },
@@ -29,8 +30,10 @@ const AddressForm = () => {
     const formError = validateFormData()
     if(!formError.hasError) {
       try {
-        const { data } = await refetch({ postcode, suburb, state });
-        console.log(data)
+        let { data } = await refetch({ postcode, suburb, state });
+        if(data) {
+          setResult(data?.validateAddress?.data?.localities?.locality)
+        }
       } catch (err) {
         setErrors({ ...errors, errorMessage: 'There was an error submitting the form.', hasError: true });
         console.log(errors)

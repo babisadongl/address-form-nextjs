@@ -32,7 +32,7 @@ const AddressForm = () => {
       try {
         let { data } = await refetch({ postcode, suburb, state });
         if(data) {
-          setResult(data?.validateAddress?.data?.localities?.locality)
+          setResult(data?.validateAddress?.data?.localities)
         }
       } catch (err) {
         setErrors({ ...errors, errorMessage: 'There was an error submitting the form.', hasError: true });
@@ -51,8 +51,8 @@ const AddressForm = () => {
   }
 
   return (
-    <div className="max-w-xl mx-auto mt-10 p-6 border rounded-lg shadow-md bg-gray-100">
-      <h2 className="text-2xl font-semibold text-gray-700 mb-4">Address Information</h2>
+    <div className="max-w-4xl mx-auto mt-10 p-6 border rounded-lg shadow-md bg-gray-100">
+      <h2 className="text-2xl font-semibold text-gray-700 mb-4">Location Information Form</h2>
 
       <form onSubmit={handleSubmit}>
         <div className="mb-4">

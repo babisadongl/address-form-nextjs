@@ -20,7 +20,7 @@ const AddressForm = () => {
     errorMessage: ''
   });
 
-  const { loading, error, refetch } = useQuery(VALIDATE_ADDRESS_QUERY, {
+  const { refetch } = useQuery(VALIDATE_ADDRESS_QUERY, {
     variables: { postcode, suburb, state },
     skip: true, // Skip the initial query
   });
@@ -105,11 +105,10 @@ const AddressForm = () => {
 
         <div className="mt-6">
           <button
-            disabled={loading}
             type="submit"
             className="w-full p-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
-            {loading ? 'Submitting...' : 'Submit'}
+            Fetch Localities
           </button>
         </div>
       </form>

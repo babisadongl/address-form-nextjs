@@ -26,13 +26,13 @@ const AddressForm = () => {
   }
 
   const validateFormData = () => {
-    errors = validateForm(suburb, postcode, state)
-    if(!errors.hasError) {
+    const updatedErrors = validateForm(suburb, postcode, state)
+    if(!updatedErrors.hasError) {
         // setSuccessFormMessage('The postcode, suburb, and state input are valid.')
         setSuccessFormMessage('The form inputs are valid.')
     }
-    setErrors(errors)
-    return errors
+    setErrors(updatedErrors)
+    return updatedErrors
   }
 
   return (

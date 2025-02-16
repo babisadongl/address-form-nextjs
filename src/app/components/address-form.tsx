@@ -1,9 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { STATE_LIST } from '../constants/state-list'
 import { Errors } from '../interface/validate-form-error';
-import {validateFields, validateForm} from '../validations/address-form-validation';
+import { validateForm } from '../validations/address-form-validation';
+import { useLazyQuery, useQuery } from '@apollo/client';
+import { VALIDATE_ADDRESS_QUERY } from '../query/address-query';
 
 const AddressForm = () => {
   const [suburb, setSuburb] = useState('');
@@ -17,18 +19,28 @@ const AddressForm = () => {
     errorMessage: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { loading, error, refetch } = useQuery(VALIDATE_ADDRESS_QUERY, {
+    variables: { postcode, suburb, state },
+    skip: true, // Skip the initial query
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const formError = validateFormData()
     if(!formError.hasError) {
-        // API call for submit
+      try {
+        const { data } = await refetch({ postcode, suburb, state });
+        console.log(data)
+      } catch (err) {
+        setErrors({ ...errors, errorMessage: 'There was an error submitting the form.', hasError: true });
+        console.log(errors)
+      }
     }
   }
 
   const validateFormData = () => {
     const updatedErrors = validateForm(suburb, postcode, state)
     if(!updatedErrors.hasError) {
-        // setSuccessFormMessage('The postcode, suburb, and state input are valid.')
         setSuccessFormMessage('The form inputs are valid.')
     }
     setErrors(updatedErrors)
@@ -90,10 +102,11 @@ const AddressForm = () => {
 
         <div className="mt-6">
           <button
+            disabled={loading}
             type="submit"
             className="w-full p-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
-            Submit
+            {loading ? 'Submitting...' : 'Submit'}
           </button>
         </div>
       </form>

@@ -9,6 +9,7 @@ const AddressForm = () => {
   const [suburb, setSuburb] = useState('');
   const [postcode, setPostcode] = useState('');
   const [state, setState] = useState('');
+  const [successFormMessage, setSuccessFormMessage] = useState('');
   let [errors, setErrors] = useState<Errors>({
     suburb: { valid: true, message: '' },
     postcode: { valid: true, message: '' },
@@ -19,7 +20,6 @@ const AddressForm = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     const formError = validateFormData()
-    console.log(formError)
     if(!formError.hasError) {
         // API call for submit
     }
@@ -27,6 +27,10 @@ const AddressForm = () => {
 
   const validateFormData = () => {
     errors = validateForm(suburb, postcode, state)
+    if(!errors.hasError) {
+        // setSuccessFormMessage('The postcode, suburb, and state input are valid.')
+        setSuccessFormMessage('The form inputs are valid.')
+    }
     setErrors(errors)
     return errors
   }
@@ -70,6 +74,7 @@ const AddressForm = () => {
             id="state"
             value={state}
             onChange={(e) => setState(e.target.value)}
+            onBlur={() => validateFormData()}
             className={`w-full p-3 mt-1 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-green-200 focus:border-green-200 ${!errors.state.valid ? 'border-red-500' : ''}`}
           >
             <option value="">Select State</option>
@@ -80,7 +85,8 @@ const AddressForm = () => {
           {!errors.state.valid && <p className="text-red-500 text-sm mt-1">{errors.state.message}</p>}
         </div>
 
-        {errors.errorMessage && <p className="text-red-500 text-sm mt-1">{errors.errorMessage}</p>}
+        {errors.hasError && errors.errorMessage && <p className="text-red-500 text-sm mt-1">{errors.errorMessage}</p>}
+        {!errors.hasError && successFormMessage && <p className="text-green-500 text-sm mt-1">{successFormMessage}</p>}
 
         <div className="mt-6">
           <button

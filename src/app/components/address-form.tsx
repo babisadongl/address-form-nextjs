@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { STATE_LIST } from '../constants/state-list'
 import { Errors } from '../interface/validate-form-error';
-import {validateFields, validateForm} from '../validations/address-form-validation';
+import { validateForm } from '../validations/address-form-validation';
+import { useLazyQuery, useQuery } from '@apollo/client';
+import { VALIDATE_ADDRESS_QUERY } from '../query/address-query';
 
 const AddressForm = () => {
   const [suburb, setSuburb] = useState('');
   const [postcode, setPostcode] = useState('');
   const [state, setState] = useState('');
   const [successFormMessage, setSuccessFormMessage] = useState('');
+  const [result, setResult] = useState([]);
   let [errors, setErrors] = useState<Errors>({
     suburb: { valid: true, message: '' },
     postcode: { valid: true, message: '' },
@@ -17,18 +20,30 @@ const AddressForm = () => {
     errorMessage: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const { refetch } = useQuery(VALIDATE_ADDRESS_QUERY, {
+    variables: { postcode, suburb, state },
+    skip: true, // Skip the initial query
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     const formError = validateFormData()
     if(!formError.hasError) {
-        // API call for submit
+      try {
+        let { data } = await refetch({ postcode, suburb, state });
+        if(data) {
+          setResult(data?.validateAddress?.data?.localities?.locality)
+        }
+      } catch (err) {
+        setErrors({ ...errors, errorMessage: 'There was an error submitting the form.', hasError: true });
+        console.log(errors)
+      }
     }
   }
 
   const validateFormData = () => {
     const updatedErrors = validateForm(suburb, postcode, state)
     if(!updatedErrors.hasError) {
-        // setSuccessFormMessage('The postcode, suburb, and state input are valid.')
         setSuccessFormMessage('The form inputs are valid.')
     }
     setErrors(updatedErrors)
@@ -93,7 +108,7 @@ const AddressForm = () => {
             type="submit"
             className="w-full p-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
           >
-            Submit
+            Fetch Localities
           </button>
         </div>
       </form>

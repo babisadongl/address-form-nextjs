@@ -1,18 +1,19 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { STATE_LIST } from '../constants/state-list'
 import { Errors } from '../interface/validate-form-error';
 import { validateForm } from '../validations/address-form-validation';
 import { useLazyQuery, useQuery } from '@apollo/client';
 import { VALIDATE_ADDRESS_QUERY } from '../query/address-query';
+import { ApiResult } from '../interface/result';
 
 const AddressForm = () => {
   const [suburb, setSuburb] = useState('');
   const [postcode, setPostcode] = useState('');
   const [state, setState] = useState('');
   const [successFormMessage, setSuccessFormMessage] = useState('');
-  const [result, setResult] = useState([]);
+  const [result, setResult] = useState<ApiResult[]>([]);
   let [errors, setErrors] = useState<Errors>({
     suburb: { valid: true, message: '' },
     postcode: { valid: true, message: '' },
@@ -32,7 +33,7 @@ const AddressForm = () => {
       try {
         let { data } = await refetch({ postcode, suburb, state });
         if(data) {
-          setResult(data?.validateAddress?.data?.localities)
+          setResult(data?.validateAddress?.data?.localities?.locality || [])
         }
       } catch (err) {
         setErrors({ ...errors, errorMessage: 'There was an error submitting the form.', hasError: true });
@@ -112,7 +113,47 @@ const AddressForm = () => {
           </button>
         </div>
       </form>
+
+<table className="min-w-full bg-white border border-gray-200 mt-10">
+        <thead className="bg-gray-50">
+          <tr>
+            <th className="px-6 py-3 border-b border-gray-200 text-left text-2xl font-semibold text-gray-700 tracking-wider">
+            Location
+            </th>
+            <th className="px-6 py-3 border-b border-gray-200 text-left text-2xl font-semibold text-gray-700 tracking-wider">
+            State
+            </th>
+            <th className="px-6 py-3 border-b border-gray-200 text-left text-2xl font-semibold text-gray-700 tracking-wider">
+            Post Code
+            </th>
+            <th className="px-6 py-3 border-b border-gray-200 text-left text-2xl font-semibold text-gray-700 tracking-wider">
+            Category
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {result.map((item: any) => (
+            <tr key={item.id} className="hover:bg-gray-50">
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {item.location}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {item.state}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {item.postcode}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {item.category}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      
     </div>
+    
+    
   );
 };
 
